@@ -1,4 +1,4 @@
-name: Maven Build with JaCoCo
+name: Maven Build, Test, Coverage & Deploy
 
 on:
   push:
@@ -22,21 +22,16 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
 
       - name: Verify Java version
         run: java -version
 
-      - name: Build, Test and Generate JaCoCo Report
+      - name: Build, Unit & Integration Tests, JaCoCo Coverage
         run: mvn clean verify
 
-      - name: Upload JaCoCo Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: target/site/jacoco
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: assignment-3-jar
-          path: target/Assignment-3-1.0-SNAPSHOT.jar
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn deploy -DskipTests
